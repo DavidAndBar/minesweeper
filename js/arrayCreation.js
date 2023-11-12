@@ -1,3 +1,5 @@
+let minesGame;
+
 const createGame = (HEIGHT, WIDTH, MINES_PERCENTAGE) => {
 
     let minesNumber = Math.floor(HEIGHT*WIDTH*MINES_PERCENTAGE);
@@ -49,18 +51,43 @@ const createGame = (HEIGHT, WIDTH, MINES_PERCENTAGE) => {
     return minesList;
 }
 
+const clickMine = (event) => {
+    let rowNumber = event.target.parentElement;
+    let columnNumber = event.target;
+
+    if (!$("#select_mine")[0].checked) {
+        checkCell(rowNumber, columnNumber);
+    } else {
+        if (!$(`#${rowNumber.id} #${columnNumber.id}`).text()) {
+            $(`#${rowNumber.id} #${columnNumber.id}`).text("X");
+        } else {
+            $(`#${rowNumber.id} #${columnNumber.id}`).text("");
+        }
+    }
+    
+
+}
+
+const checkCell = (rowNumber, columnNumber) => {
+    let number = minesGame[rowNumber.id.slice(1)][columnNumber.id.slice(1)];
+    
+    $(`#${rowNumber.id} #${columnNumber.id}`).text(number);
+}
+
+
+
 $(document).ready(() => {
-    const HEIGHT = 14; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-    const WIDTH = 9; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
-    const MINES_PERCENTAGE = 0.70; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
-    const minesList = createGame(HEIGHT, WIDTH, MINES_PERCENTAGE);
+    const HEIGHT = 10; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+    const WIDTH = 8; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+    const MINES_PERCENTAGE = 0.0875; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+    minesGame = createGame(HEIGHT, WIDTH, MINES_PERCENTAGE);
     let cssRows = "";
     let cssColumns = "";
     for (let i = 1; i <= HEIGHT; i++) {
         cssColumns = "";
-        $("#mines-grid").append(`<div id="row${i}" class="rows"></div>`);
+        $("#mines-grid").append(`<div id="r${i}" class="rows"></div>`);
         for (let j = 1; j <= WIDTH; j++){
-            $(`#row${i}`).append(`<div id="column${j}" class="mine"></div>`);
+            $(`#r${i}`).append(`<div id="c${j}" class="mine" ondblclick={clickMine(event)} onclick={clickMine(event)} ></div>`);
             cssColumns += "1fr ";
         }
         cssRows += "1fr ";
@@ -77,9 +104,10 @@ $(document).ready(() => {
         gridTemplateColumns: cssColumns,
         gridTemplateRows: "1fr"
     });
-    console.log(minesList);
-
+    console.log(minesGame);
 })
+
+console.log(minesGame);
 
 
 

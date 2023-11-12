@@ -2,10 +2,24 @@ h2 {
     text-align: center;
 }
 
+#header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#div_checkbox {
+    margin-top: auto;
+}
+
+h3 {
+    margin-bottom: 0;
+    text-align: center;
+}
+
 #board {
     background-color: #B0B0B0;
     border: 1px black solid;
-    height: 35vw;
+    height: 40vw;
     margin: 2% auto 2% auto;
     width: 35vw;
 }
@@ -13,7 +27,7 @@ h2 {
 #mines-grid{
     display: grid;
     width: 80%;
-    height: 90%;
+    height: 85%;
     margin: 5% auto 5% auto;
 }
 
@@ -23,8 +37,14 @@ h2 {
 }
 
 .mine {
+    align-items: center;
     background-color: #eee;
     border-style: outset;
     border-width: 5px;
+    box-sizing: content-box;
+    display: flex;
+    font-size: 1em;
+    justify-content: center;
+    text-align: center;
     width: 80%;
 }
