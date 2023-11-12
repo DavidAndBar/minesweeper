@@ -1,0 +1,30 @@
+h2 {
+    text-align: center;
+}
+
+#board {
+    background-color: #B0B0B0;
+    border: 1px black solid;
+    height: 35vw;
+    margin: 2% auto 2% auto;
+    width: 35vw;
+}
+
+#mines-grid{
+    display: grid;
+    width: 80%;
+    height: 90%;
+    margin: 5% auto 5% auto;
+}
+
+.rows {
+    display: grid;
+    height: 95%;
+}
+
+.mine {
+    background-color: #eee;
+    border-style: outset;
+    border-width: 5px;
+    width: 80%;
+}
