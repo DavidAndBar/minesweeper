@@ -4,15 +4,16 @@ h2 {
 
 #header {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
-#div_checkbox {
-    margin-top: auto;
+#header div {
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }
 
 h3 {
-    margin-bottom: 0;
     text-align: center;
 }
 
@@ -28,7 +29,7 @@ h3 {
     display: grid;
     width: 80%;
     height: 85%;
-    margin: 5% auto 5% auto;
+    margin: 0 auto 5% auto;
 }
 
 .rows {
@@ -47,4 +48,13 @@ h3 {
     justify-content: center;
     text-align: center;
     width: 80%;
+}
+
+#game-over-div {
+    align-items: center;
+    display: flex;
+    font-size: 5em;
+    justify-content: center;
+    position: absolute;
+    z-index: 1;
 }
