@@ -1,9 +1,9 @@
 let minesGame;
 let minesDiscovered = 0;
 
-const createGame = (HEIGHT, WIDTH, MINES_PERCENTAGE) => {
+const createGame = (HEIGHT, WIDTH, MINES_NUMBER) => {
 
-    let minesNumber = Math.floor(HEIGHT*WIDTH*MINES_PERCENTAGE);
+    let minesNumber = MINES_NUMBER;
 
     let minesList = [];
     let minesRow = [];
@@ -15,7 +15,6 @@ const createGame = (HEIGHT, WIDTH, MINES_PERCENTAGE) => {
     for (let i = 0; i < HEIGHT + 2; i++) {
         for (let j = 0; j < WIDTH + 2; j++) {
             minesRow[j] = number;
-            console.log(number);
         }
         minesList[i] = [...minesRow]; // Passing the array by reference.
     }
@@ -52,31 +51,51 @@ const createGame = (HEIGHT, WIDTH, MINES_PERCENTAGE) => {
     return minesList;
 }
 
-const clickMine = (event) => {
+const clickMine = (event, HEIGHT, WIDTH, MINES_NUMBER) => {
     let rowNumber = event.target.parentElement.id;
     let columnNumber = event.target.id;
     if (event.which == 1 && $(`#${rowNumber} #${columnNumber}`).text() != "X") {
-        checkCell(rowNumber, columnNumber);
+        checkCell(rowNumber, columnNumber, HEIGHT, WIDTH);
+        checkWin(HEIGHT, WIDTH, MINES_NUMBER);
     } else if (event.which == 3) {
         flagMine(rowNumber, columnNumber);
     }
-    
+}
 
+const checkWin = (HEIGHT, WIDTH, MINES_NUMBER) => {
+    let numberDiscovered = 0;
+    for (let i = 1; i <= HEIGHT ; i++) {
+        for (let j = 1 ; j <= WIDTH; j++) {
+            if ($(`#r${i} #c${j}`).text() != "X" && (!!$(`#r${i} #c${j}`).text() || $(`#r${i} #c${j}`).text() == '0' )) {
+                numberDiscovered++;
+            }
+        }
+    }
+    if (numberDiscovered == WIDTH * HEIGHT - MINES_NUMBER) {
+        $("body").append('<div id="game-over-div"> You Won! </div>');
+        $("#game-over-div").css({
+            top: $("#mines-grid").position().top,
+            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left")),
+            width: parseFloat($("#mines-grid").css("width")),
+            height: parseFloat($("#mines-grid").css("height"))
+        });
+    }
 }
 
 const flagMine = (rowNumber, columnNumber) => {
+    let minesDiscovered = parseInt($('#div-mines-discovered').text());
     if (!$(`#${rowNumber} #${columnNumber}`).text()) {
         $(`#${rowNumber} #${columnNumber}`).text("X");
-        minesDiscovered++;
+        minesDiscovered--;
         $('#div-mines-discovered').text(minesDiscovered);
     } else if ($(`#${rowNumber} #${columnNumber}`).text() == "X") {
         $(`#${rowNumber} #${columnNumber}`).text("");
-        minesDiscovered--;
+        minesDiscovered++;
         $('#div-mines-discovered').text(minesDiscovered);
     }
 }
 
-const checkCell = (rowNumber, columnNumber) => { 
+const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH) => { 
     let number = minesGame[rowNumber.slice(1)][columnNumber.slice(1)];
     if (number == -1) {
         $("body").append('<div id="game-over-div"> You Lose </div>');
@@ -88,32 +107,56 @@ const checkCell = (rowNumber, columnNumber) => {
         });
     } else if (number == 0) {
         $(`#${rowNumber} #${columnNumber}`).text(number);
-        openSurrondings(rowNumber, columnNumber); // here the logic to check cells around.
+        openSurrondings(rowNumber, columnNumber, HEIGHT, WIDTH); // here the logic to check cells around.
     } else {
         $(`#${rowNumber} #${columnNumber}`).text(number);
+        if (number == 1) {
+            $(`#${rowNumber} #${columnNumber}`).css({
+                color: 'green',
+            });
+        } else if (number == 2) {
+            $(`#${rowNumber} #${columnNumber}`).css({
+                color: 'blue',
+            });
+        } else if (number == 3) {
+            $(`#${rowNumber} #${columnNumber}`).css({
+                color: 'red',
+            });
+        } else if (number == 4) {
+            $(`#${rowNumber} #${columnNumber}`).css({
+                color: 'purple',
+            });
+        } else if (number == 5) {
+            $(`#${rowNumber} #${columnNumber}`).css({
+                color: 'darkblue',
+            });
+        } 
     }
 }
 
-/*const openSurrondings = (rowNumber, columnNumber) => {
-    let i = rowNumber; // i height, j width
-    let k = columnNumber;
-    for (k = i-1; k <= i+1; k++) {
-        for(l = j - 1; l <= j + 1; l++){
-            if (!(k == i && l == j) && !(k==0 || l == 0) && !(k > HEIGHT || l > WIDTH)) { //I'm here, im missing to test the function and add the recursivity.
-                if (minesList[k][l] == 0) {
-                    countMines++;
+const openSurrondings = (rowNumber, columnNumber, HEIGHT, WIDTH) => {
+    let rn = parseInt(rowNumber.slice(1)); // i height, j width
+    let cn = parseInt(columnNumber.slice(1));
+    if (rowNumber != `r-1` && columnNumber != `c-1`) {
+        for (let i = rn - 1; i <= rn + 1; i++) {
+            for(let k = cn - 1; k <= cn + 1; k++){
+                if (!(k == cn && i == rn) && !(k==0 || i == 0) && !(i > HEIGHT || k > WIDTH)) { //I'm here, im missing to test the function and add the recursivity.
+                    if ($(`#r${i} #c${k}`).text().length == 0) {
+                        checkCell(`r${i}`, `c${k}`, HEIGHT, WIDTH);
+                    }
                 }
             }
         }
     }
-}*/
+}
 
 $(document).ready(() => {
     window.addEventListener("contextmenu", e => e.preventDefault());
-    const HEIGHT = 10; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-    const WIDTH = 8; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
-    const MINES_PERCENTAGE = 0.0875; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
-    minesGame = createGame(HEIGHT, WIDTH, MINES_PERCENTAGE);
+    const HEIGHT = 20; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+    const WIDTH = 15; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+    const MINES_NUMBER = 40; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+    minesGame = createGame(HEIGHT, WIDTH, MINES_NUMBER);
+    $('#div-mines-discovered').text(MINES_NUMBER);
     let cssRows = "";
     let cssColumns = "";
     for (let i = 1; i <= HEIGHT; i++) {
@@ -127,7 +170,7 @@ $(document).ready(() => {
     }
 
     $('.mine').bind("mousedown", (event) => {
-        clickMine(event);
+        clickMine(event, HEIGHT, WIDTH, MINES_NUMBER);
     })
     
 
