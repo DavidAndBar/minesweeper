@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.5.0-alpha.1/jquery.mobile-1.5.0-alpha.1.min.js"></script>
     <script src="../js/arrayCreation.js"></script>
     <link rel="stylesheet" href="../css/styles.css">
     <title>Document</title>
@@ -20,7 +21,12 @@
                     0
                 </div>
                 <div id="reset-button">
-                    <a href="./index.html">Reset</a>
+                    <select name="difficulty" id="difficulty">
+                        <option value="beginner">Beginner</option>
+                        <option value="easy" selected>Easy</option>
+                        <option value="inter">Intermediate</option>
+                        <option value="expert">Expert</option>
+                    </select>
                 </div>
             </div>
             <div id="mines-grid"></div>

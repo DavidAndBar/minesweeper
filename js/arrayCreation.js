@@ -1,7 +1,12 @@
 let minesGame;
 let minesDiscovered = 0;
+let timer;
+var HEIGHT; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+var WIDTH; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+var MINES_NUMBER; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+var mineFontSize;
 
-const createGame = (HEIGHT, WIDTH, MINES_NUMBER) => {
+const createGame = (HEIGHT, WIDTH, MINES_NUMBER, intRowNumber, intColumnNumber) => {
 
     let minesNumber = MINES_NUMBER;
 
@@ -18,12 +23,11 @@ const createGame = (HEIGHT, WIDTH, MINES_NUMBER) => {
         }
         minesList[i] = [...minesRow]; // Passing the array by reference.
     }
-
     // Choosing randomly where the mines are.
     while (minesNumber > 0) {
         x = Math.round(Math.random()*(HEIGHT - 1)) + 1;
         y = Math.round(Math.random()*(WIDTH - 1)) + 1;
-        if (minesList[x][y] != -1) {
+        if (minesList[x][y] != -1 && !( x == parseInt(intRowNumber) && y == parseInt(intColumnNumber))) {
             minesList[x][y] = -1;
             minesNumber--;
         }
@@ -47,58 +51,36 @@ const createGame = (HEIGHT, WIDTH, MINES_NUMBER) => {
             }
         }
     }
-
     return minesList;
 }
+
 
 const clickMine = (event, HEIGHT, WIDTH, MINES_NUMBER) => {
     let rowNumber = event.target.parentElement.id;
     let columnNumber = event.target.id;
-    if (event.which == 1 && $(`#${rowNumber} #${columnNumber}`).text() != "X") {
-        checkCell(rowNumber, columnNumber, HEIGHT, WIDTH);
-        checkWin(HEIGHT, WIDTH, MINES_NUMBER);
+
+    if (event.which == 1 && $(`#${rowNumber} #${columnNumber}`).val() != "X") {
+        leftClick(rowNumber, columnNumber);
     } else if (event.which == 3) {
         flagMine(rowNumber, columnNumber);
     }
 }
 
-const checkWin = (HEIGHT, WIDTH, MINES_NUMBER) => {
-    let numberDiscovered = 0;
-    for (let i = 1; i <= HEIGHT ; i++) {
-        for (let j = 1 ; j <= WIDTH; j++) {
-            if ($(`#r${i} #c${j}`).text() != "X" && (!!$(`#r${i} #c${j}`).text() || $(`#r${i} #c${j}`).text() == '0' )) {
-                numberDiscovered++;
-            }
-        }
-    }
-    if (numberDiscovered == WIDTH * HEIGHT - MINES_NUMBER) {
-        $("body").append('<div id="game-over-div"> You Won! </div>');
-        $("#game-over-div").css({
-            top: $("#mines-grid").position().top,
-            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left")),
-            width: parseFloat($("#mines-grid").css("width")),
-            height: parseFloat($("#mines-grid").css("height"))
-        });
-    }
+const leftClick = (rowNumber, columnNumber) => {
+    checkCell(rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER);
+    checkWin(HEIGHT, WIDTH, MINES_NUMBER);
 }
 
-const flagMine = (rowNumber, columnNumber) => {
-    let minesDiscovered = parseInt($('#div-mines-discovered').text());
-    if (!$(`#${rowNumber} #${columnNumber}`).text()) {
-        $(`#${rowNumber} #${columnNumber}`).text("X");
-        minesDiscovered--;
-        $('#div-mines-discovered').text(minesDiscovered);
-    } else if ($(`#${rowNumber} #${columnNumber}`).text() == "X") {
-        $(`#${rowNumber} #${columnNumber}`).text("");
-        minesDiscovered++;
-        $('#div-mines-discovered').text(minesDiscovered);
+const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER,) => {
+    let intRowNumber = rowNumber.slice(1);
+    let intColumnNumber = columnNumber.slice(1);
+    if (!minesGame) {
+        minesGame = createGame(HEIGHT, WIDTH, MINES_NUMBER, intRowNumber, intColumnNumber);
     }
-}
-
-const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH) => { 
-    let number = minesGame[rowNumber.slice(1)][columnNumber.slice(1)];
+    let number = minesGame[intRowNumber][intColumnNumber];
     if (number == -1) {
-        $("body").append('<div id="game-over-div"> You Lose </div>');
+        $("body").append('<div id="game-over-div"> <p>You Lose <span onclick="startover()"> Try again! </span></p></div>');
+        $("#mines-grid").css({"opacity": "0.4"})
         $("#game-over-div").css({
             top: $("#mines-grid").position().top,
             left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left")),
@@ -106,10 +88,11 @@ const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH) => {
             height: parseFloat($("#mines-grid").css("height"))
         });
     } else if (number == 0) {
-        $(`#${rowNumber} #${columnNumber}`).text(number);
+        $(`#${rowNumber} #${columnNumber}`).val(number).addClass("mine-opened");
+        
         openSurrondings(rowNumber, columnNumber, HEIGHT, WIDTH); // here the logic to check cells around.
     } else {
-        $(`#${rowNumber} #${columnNumber}`).text(number);
+        $(`#${rowNumber} #${columnNumber}`).text(number).val(number).addClass("mine-opened");
         if (number == 1) {
             $(`#${rowNumber} #${columnNumber}`).css({
                 color: 'green',
@@ -141,7 +124,7 @@ const openSurrondings = (rowNumber, columnNumber, HEIGHT, WIDTH) => {
         for (let i = rn - 1; i <= rn + 1; i++) {
             for(let k = cn - 1; k <= cn + 1; k++){
                 if (!(k == cn && i == rn) && !(k==0 || i == 0) && !(i > HEIGHT || k > WIDTH)) { //I'm here, im missing to test the function and add the recursivity.
-                    if ($(`#r${i} #c${k}`).text().length == 0) {
+                    if ($(`#r${i} #c${k}`).val().length == 0) {
                         checkCell(`r${i}`, `c${k}`, HEIGHT, WIDTH);
                     }
                 }
@@ -150,12 +133,83 @@ const openSurrondings = (rowNumber, columnNumber, HEIGHT, WIDTH) => {
     }
 }
 
-$(document).ready(() => {
-    window.addEventListener("contextmenu", e => e.preventDefault());
-    const HEIGHT = 20; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-    const WIDTH = 15; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
-    const MINES_NUMBER = 40; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
-    minesGame = createGame(HEIGHT, WIDTH, MINES_NUMBER);
+const checkWin = (HEIGHT, WIDTH, MINES_NUMBER) => {
+    let numberDiscovered = 0;
+    for (let i = 1; i <= HEIGHT ; i++) {
+        for (let j = 1 ; j <= WIDTH; j++) {
+            if ($(`#r${i} #c${j}`).val() != "X" && (!!$(`#r${i} #c${j}`).val() || $(`#r${i} #c${j}`).val() == '0' )) {
+                numberDiscovered++;
+            }
+        }
+    }
+    if (numberDiscovered == WIDTH * HEIGHT - MINES_NUMBER) {
+        $("body").append('<div id="game-over-div"><p>You Won <span onclick="startover()"> Play again! </span></p></div>');
+        $("#mines-grid").css({"opacity": "0.4"})
+        $("#game-over-div").css({
+            top: $("#mines-grid").position().top,
+            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left")),
+            width: parseFloat($("#mines-grid").css("width")),
+            height: parseFloat($("#mines-grid").css("height"))
+        });
+    }
+}
+
+const flagMine = (rowNumber, columnNumber) => {
+    let minesDiscovered = parseInt($('#div-mines-discovered').text());
+    if (!$(`#${rowNumber} #${columnNumber}`).val()) {
+        $(`#${rowNumber} #${columnNumber}`).val("X");
+        $(`#${rowNumber} #${columnNumber}`).css({
+            backgroundImage: "url('../icons/skull-flag.svg')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center"
+        });
+        minesDiscovered--;
+        $('#div-mines-discovered').text(minesDiscovered);
+    } else if ($(`#${rowNumber} #${columnNumber}`).val() == "X") {
+        $(`#${rowNumber} #${columnNumber}`).val("");
+        $(`#${rowNumber} #${columnNumber}`).css({
+            backgroundImage: "none"
+        });
+        minesDiscovered++;
+        $('#div-mines-discovered').text(minesDiscovered);
+    }
+}
+
+
+
+
+
+const newGame = (difficulty) => {
+
+    switch (difficulty) {
+        case "beginner":
+            HEIGHT = 10; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 8; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            MINES_NUMBER = 7; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+            mineFontSize = "2em";
+            break;
+        case "easy":
+            HEIGHT = 14; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 9; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            MINES_NUMBER = 15; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+            mineFontSize = "1.3em";
+            break;
+        case "inter":
+            HEIGHT = 20; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 15; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            MINES_NUMBER = 40; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+            mineFontSize = "1em";
+            break;
+        case "expert":
+            HEIGHT = 26; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 19; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            MINES_NUMBER = 99; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
+            mineFontSize = "0.8em";
+            break;
+        default:
+            break;
+    }
+
     $('#div-mines-discovered').text(MINES_NUMBER);
     let cssRows = "";
     let cssColumns = "";
@@ -173,6 +227,15 @@ $(document).ready(() => {
         clickMine(event, HEIGHT, WIDTH, MINES_NUMBER);
     })
     
+    $('.mine').on("taphold",(event) => {
+        let rowNumber = event.target.parentElement.id;
+        let columnNumber = event.target.id;
+        flagMine(rowNumber, columnNumber);
+    });
+
+    $('.mine').css({
+        fontSize: mineFontSize,
+    })
 
     $("#mines-grid").css({
         gridTemplateColumns: "1fr",
@@ -183,5 +246,25 @@ $(document).ready(() => {
         gridTemplateColumns: cssColumns,
         gridTemplateRows: "1fr"
     });
-    console.log(minesGame);
+    $("#mines-grid").css({"opacity": "1"})
+}
+
+const deleteGame = () => {
+    $("#mines-grid").empty();
+    $("#game-over-div").remove();
+    minesGame = undefined;
+}
+
+const startover = () => {
+    deleteGame();
+    newGame($("#difficulty").val());
+}
+
+$(document).ready(() => {
+    window.addEventListener("contextmenu", e => e.preventDefault());
+    newGame("easy"); 
+    $("#difficulty").on("change", () => {
+        deleteGame();
+        newGame($("#difficulty").val());
+    } );
 })
