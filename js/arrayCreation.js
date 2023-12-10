@@ -23,11 +23,21 @@ const createGame = (HEIGHT, WIDTH, MINES_NUMBER, intRowNumber, intColumnNumber) 
         }
         minesList[i] = [...minesRow]; // Passing the array by reference.
     }
+    intRowNumber = parseInt(intRowNumber);
+    intColumnNumber = parseInt(intColumnNumber);
     // Choosing randomly where the mines are.
     while (minesNumber > 0) {
         x = Math.round(Math.random()*(HEIGHT - 1)) + 1;
         y = Math.round(Math.random()*(WIDTH - 1)) + 1;
-        if (minesList[x][y] != -1 && !( x == parseInt(intRowNumber) && y == parseInt(intColumnNumber))) {
+        surrondings =   !( x == intRowNumber - 1 && y == intColumnNumber - 1) && 
+                    !( x == intRowNumber - 1 && y == intColumnNumber) && 
+                    !( x == intRowNumber - 1 && y == intColumnNumber + 1) && 
+                    !( x == intRowNumber && y == intColumnNumber - 1) && 
+                    !( x == intRowNumber && y == intColumnNumber + 1) &&
+                    !( x == intRowNumber + 1 && y == intColumnNumber - 1) &&
+                    !( x == intRowNumber + 1 && y == intColumnNumber) &&
+                    !( x == intRowNumber + 1 && y == intColumnNumber + 1);
+        if (minesList[x][y] != -1 && !( x == intRowNumber && y == intColumnNumber) && surrondings) {
             minesList[x][y] = -1;
             minesNumber--;
         }
@@ -79,7 +89,7 @@ const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER,) => {
     }
     let number = minesGame[intRowNumber][intColumnNumber];
     if (number == -1) {
-        $("body").append('<div id="game-over-div"> <p>You Lose <span onclick="startover()"> Try again! </span></p></div>');
+        $("body").append('<div id="game-over-div"> <p>You lose, <span onclick="startover()"> try again! </span></p></div>');
         $("#mines-grid").css({"opacity": "0.4"})
         $("#game-over-div").css({
             top: $("#mines-grid").position().top,
@@ -143,7 +153,7 @@ const checkWin = (HEIGHT, WIDTH, MINES_NUMBER) => {
         }
     }
     if (numberDiscovered == WIDTH * HEIGHT - MINES_NUMBER) {
-        $("body").append('<div id="game-over-div"><p>You Won <span onclick="startover()"> Play again! </span></p></div>');
+        $("body").append('<div id="game-over-div"><p>You Won, <span onclick="startover()"> play again! </span></p></div>');
         $("#mines-grid").css({"opacity": "0.4"})
         $("#game-over-div").css({
             top: $("#mines-grid").position().top,
@@ -180,29 +190,29 @@ const flagMine = (rowNumber, columnNumber) => {
 
 
 const newGame = (difficulty) => {
-
+    let sizeMine = 45;
     switch (difficulty) {
         case "beginner":
-            HEIGHT = 10; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 8; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 8; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 10; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 7; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "2em";
             break;
         case "easy":
-            HEIGHT = 14; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 9; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 9; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 14; // Beg: 8 Easy: 9 Inter: 15 Exp: 19q
             MINES_NUMBER = 15; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "1.3em";
             break;
         case "inter":
-            HEIGHT = 20; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 15; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 15; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 20; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 40; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "1em";
             break;
         case "expert":
-            HEIGHT = 26; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 19; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 19; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 26; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 99; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "0.8em";
             break;
@@ -218,9 +228,9 @@ const newGame = (difficulty) => {
         $("#mines-grid").append(`<div id="r${i}" class="rows"></div>`);
         for (let j = 1; j <= WIDTH; j++){
             $(`#r${i}`).append(`<div id="c${j}" class="mine" ></div>`);
-            cssColumns += "1fr ";
+            cssColumns += `${sizeMine}px `;
         }
-        cssRows += "1fr ";
+        cssRows += `${sizeMine}px `;
     }
 
     $('.mine').bind("mousedown", (event) => {
@@ -238,13 +248,13 @@ const newGame = (difficulty) => {
     })
 
     $("#mines-grid").css({
-        gridTemplateColumns: "1fr",
+        gridTemplateColumns: `1fr`,
         gridTemplateRows: cssRows
     });
 
     $(".rows").css({
         gridTemplateColumns: cssColumns,
-        gridTemplateRows: "1fr"
+        gridTemplateRows: `1fr`
     });
     $("#mines-grid").css({"opacity": "1"})
 }
@@ -262,9 +272,10 @@ const startover = () => {
 
 $(document).ready(() => {
     window.addEventListener("contextmenu", e => e.preventDefault());
-    newGame("easy"); 
+    newGame("easy"); // Change to easy
     $("#difficulty").on("change", () => {
         deleteGame();
         newGame($("#difficulty").val());
     } );
+    $(".ui-body-a").remove();
 })
