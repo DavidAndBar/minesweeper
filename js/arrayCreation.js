@@ -193,26 +193,26 @@ const newGame = (difficulty) => {
     let sizeMine = 45;
     switch (difficulty) {
         case "beginner":
-            HEIGHT = 8; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 10; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 10; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 8; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 7; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "2em";
             break;
         case "easy":
-            HEIGHT = 9; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 14; // Beg: 8 Easy: 9 Inter: 15 Exp: 19q
+            HEIGHT = 14; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 9; // Beg: 8 Easy: 9 Inter: 15 Exp: 19q
             MINES_NUMBER = 15; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "1.3em";
             break;
         case "inter":
-            HEIGHT = 15; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 20; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 20; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 15; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 40; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "1em";
             break;
         case "expert":
-            HEIGHT = 19; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
-            WIDTH = 26; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
+            HEIGHT = 26; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
+            WIDTH = 19; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 99; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
             mineFontSize = "0.8em";
             break;
@@ -257,6 +257,9 @@ const newGame = (difficulty) => {
         gridTemplateRows: `1fr`
     });
     $("#mines-grid").css({"opacity": "1"})
+
+    $("#board").css({"width": `${sizeMine*WIDTH*1.30}px`})
+
 }
 
 const deleteGame = () => {
