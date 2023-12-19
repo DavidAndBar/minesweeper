@@ -89,12 +89,13 @@ const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER,) => {
     }
     let number = minesGame[intRowNumber][intColumnNumber];
     if (number == -1) {
-        $("body").append('<div id="game-over-div"> <p>You lose, <span onclick="startover()"> try again! </span></p></div>');
+        $("body").append('<div id="game-over-div"> <p>You lose!</p></div>');
+        $("#reset-icon img").attr("src", "../icons/dead-face.svg");
         $("#mines-grid").css({"opacity": "0.4"})
         $("#game-over-div").css({
             top: $("#mines-grid").position().top,
-            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left")),
-            width: parseFloat($("#mines-grid").css("width")),
+            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left"))*2  + parseFloat($("#mines-grid").css("border-left-width"))*2,
+            width: parseFloat($("#mines-grid").css("width") + parseFloat($("#mines-grid").css("margin-left"))*4 + parseFloat($("#mines-grid").css("border-left-width"))*4 ),
             height: parseFloat($("#mines-grid").css("height"))
         });
     } else if (number == 0) {
@@ -153,7 +154,8 @@ const checkWin = (HEIGHT, WIDTH, MINES_NUMBER) => {
         }
     }
     if (numberDiscovered == WIDTH * HEIGHT - MINES_NUMBER) {
-        $("body").append('<div id="game-over-div"><p>You Won, <span onclick="startover()"> play again! </span></p></div>');
+        $("body").append('<div id="game-over-div"> <p>You Won!</p></div>');
+        $("#reset-icon img").attr("src", "../icons/winner-icon.svg");
         $("#mines-grid").css({"opacity": "0.4"})
         $("#game-over-div").css({
             top: $("#mines-grid").position().top,
@@ -185,18 +187,14 @@ const flagMine = (rowNumber, columnNumber) => {
     }
 }
 
-
-
-
-
 const newGame = (difficulty) => {
-    let sizeMine = 45;
+    let sizeMine = 40;
     switch (difficulty) {
         case "beginner":
             HEIGHT = 10; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
             WIDTH = 8; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
             MINES_NUMBER = 7; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
-            mineFontSize = "2em";
+            mineFontSize = "1.5em";
             break;
         case "easy":
             HEIGHT = 14; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
@@ -248,18 +246,17 @@ const newGame = (difficulty) => {
     })
 
     $("#mines-grid").css({
-        gridTemplateColumns: `1fr`,
+        //gridTemplateColumns: `1fr`,
         gridTemplateRows: cssRows
     });
 
     $(".rows").css({
         gridTemplateColumns: cssColumns,
-        gridTemplateRows: `1fr`
+        //gridTemplateRows: `1fr`
     });
     $("#mines-grid").css({"opacity": "1"})
 
     $("#board").css({"width": `${sizeMine*WIDTH*1.30}px`})
-
 }
 
 const deleteGame = () => {
@@ -271,14 +268,19 @@ const deleteGame = () => {
 const startover = () => {
     deleteGame();
     newGame($("#difficulty").val());
+    $(".ui-selectmenu-button-text").remove();
+    $("#reset-icon img").attr("src", "../icons/smile-face.svg");
 }
 
 $(document).ready(() => {
     window.addEventListener("contextmenu", e => e.preventDefault());
     newGame("easy"); // Change to easy
     $("#difficulty").on("change", () => {
-        deleteGame();
-        newGame($("#difficulty").val());
+        startover();
     } );
     $(".ui-body-a").remove();
+    $(".ui-selectmenu-button-text").remove();
+    $(window).resize(() => {
+        console.log(window.innerWidth);
+    });
 })
