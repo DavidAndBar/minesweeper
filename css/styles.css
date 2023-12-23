@@ -79,7 +79,7 @@ h3 {
     /*margin: 0 auto 0 auto;*/
     overflow: auto;
     border: dotted black;
-    max-height: 80vh;
+    max-height: 75vh;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
