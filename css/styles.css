@@ -1,6 +1,8 @@
 body {
     margin: 0;
-    height: 100vh;
+    margin-top: 1%;
+    height: 99%;
+    /*height: 100vh;*/
 }
 
 h2 {
@@ -9,11 +11,39 @@ h2 {
     margin-bottom: 0;
 }
 
+h4 {
+    margin: 0;
+}
+
+button {
+    font: caption;
+}
+
+p {
+    margin: 0;
+}
+
+li {
+    font-size: 0.4em;
+}
+
+.w3-bar .w3-button {
+    white-space: normal;
+    padding: 0;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+#header-top {
+    display: flex;
+    justify-content: space-around;
+}
+
 #header {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 2%;
-    margin-top: 2%;
+    margin-bottom: 1%;
+    margin-top: 1%;
 }
 
 #header div {
@@ -31,10 +61,10 @@ h3 {
 #board {
     background-color: #B0B0B0;
     border: 1px black solid;
-    margin: 0% auto 2% auto;
-    max-width: 95vw;
+    margin: 0% auto 0% auto;
+    max-width: 97vw;
     padding-bottom: 2%;
-    max-height: 90vh;
+    max-height: 95vh;
 }
 
 #grid-wrapper {

@@ -5,6 +5,12 @@ var HEIGHT; // Beg: 10 Easy: 14 Inter: 20 Exp: 26
 var WIDTH; // Beg: 8 Easy: 9 Inter: 15 Exp: 19
 var MINES_NUMBER; // Beg: 7 Easy: 15 Inter: 40 Exp: 99
 var mineFontSize;
+var startTime;
+var timerOn;
+var highScoreBeg = {"high-scores": [ {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}]};
+var highScoreEasy = {"high-scores": [ {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}]};
+var highScoreInter = {"high-scores": [ {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}]};
+var highScoreExpert = {"high-scores": [ {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}, {"name": "", "time": ""}]};
 
 const createGame = (HEIGHT, WIDTH, MINES_NUMBER, intRowNumber, intColumnNumber) => {
 
@@ -78,7 +84,7 @@ const clickMine = (event, HEIGHT, WIDTH, MINES_NUMBER) => {
 
 const leftClick = (rowNumber, columnNumber) => {
     checkCell(rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER);
-    checkWin(HEIGHT, WIDTH, MINES_NUMBER);
+    setTimeout(checkWin, 0, HEIGHT, WIDTH, MINES_NUMBER);
 }
 
 const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER,) => {
@@ -86,18 +92,12 @@ const checkCell = (rowNumber, columnNumber, HEIGHT, WIDTH, MINES_NUMBER,) => {
     let intColumnNumber = columnNumber.slice(1);
     if (!minesGame) {
         minesGame = createGame(HEIGHT, WIDTH, MINES_NUMBER, intRowNumber, intColumnNumber);
+        timerOn = setInterval(updateDisplay, 10);
     }
     let number = minesGame[intRowNumber][intColumnNumber];
     if (number == -1) {
-        $("body").append('<div id="game-over-div"> <p>You lose!</p></div>');
-        $("#reset-icon img").attr("src", "../icons/dead-face.svg");
-        $("#mines-grid").css({"opacity": "0.4"})
-        $("#game-over-div").css({
-            top: $("#mines-grid").position().top,
-            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left"))*2  + parseFloat($("#mines-grid").css("border-left-width"))*2,
-            width: parseFloat($("#mines-grid").css("width") + parseFloat($("#mines-grid").css("margin-left"))*4 + parseFloat($("#mines-grid").css("border-left-width"))*4 ),
-            height: parseFloat($("#mines-grid").css("height"))
-        });
+        clearInterval(timerOn);
+        showWindow(0, false, false);
     } else if (number == 0) {
         $(`#${rowNumber} #${columnNumber}`).val(number).addClass("mine-opened");
         
@@ -154,15 +154,95 @@ const checkWin = (HEIGHT, WIDTH, MINES_NUMBER) => {
         }
     }
     if (numberDiscovered == WIDTH * HEIGHT - MINES_NUMBER) {
-        $("body").append('<div id="game-over-div"> <p>You Won!</p></div>');
-        $("#reset-icon img").attr("src", "../icons/winner-icon.svg");
-        $("#mines-grid").css({"opacity": "0.4"})
+        clearInterval(timerOn);
+        let time = (parseFloat($('#timer').find('.value').text())).toFixed(2);
+        showWindow(time, true, false);
+        setTimeout(setHighScore, 50, time);
+    }
+}
+
+const showWindow = (time, win, checkScore) => {
+    if ($("#game-over-div").length == 0) {
+        if (checkScore) {
+            highScoreBeg = JSON.parse(localStorage.getItem("high-scores-beg"));
+            $("body").append(`
+            <div id="game-over-div"> 
+                <h3>High Scores: </h3>
+                <div class="w3-bar w3-black" style="display: flex; justify-content: center">
+                    <button class="w3-bar-item w3-button" onclick="openScores('Beginner')">Beginner</button>
+                    <button class="w3-bar-item w3-button" onclick="openScores('Easy')">Easy</button>
+                    <button class="w3-bar-item w3-button" onclick="openScores('Intermediate')">Intermediate</button>
+                    <button class="w3-bar-item w3-button" onclick="openScores('Expert')">Expert</button>
+                </div>
+                <div id="Beginner" class="high-scores">
+                    <ul></ul>
+                </div>
+                <div id="Easy" class="high-scores" style="display:none">
+                    <ul></ul>
+                </div>
+                <div id="Intermediate" class="high-scores" style="display:none">
+                    <ul></ul>
+                </div>
+                <div id="Expert" class="high-scores" style="display:none">
+                    <ul></ul>
+                </div>
+            </div>`);
+            highScoreBeg["high-scores"].forEach((e) => {
+                if (e.name != "") {
+                    $("#Beginner ul").append(`<li>${e.name}: ${e.time} s</li>`)
+                }
+            })
+        } else {
+            $("body").append(`<div id="game-over-div"> <p>You ${win ? `won!</p>  <p>Time: ${time} s</p> </div>` : "lose!</p></div>"}`);
+            $("#reset-icon img").attr("src", `../icons/${win ? "winner-icon" : "dead-face"}.svg`);
+        }
+        $("#mines-grid").css({"opacity": "0.4"});
+        let leftPos = ($("#mines-grid").position().left)*1.0110605075 + parseFloat($("#mines-grid").css("border-width"));
         $("#game-over-div").css({
             top: $("#mines-grid").position().top,
-            left: $("#mines-grid").position().left + parseFloat($("#mines-grid").css("margin-left")),
-            width: parseFloat($("#mines-grid").css("width")),
+            left: leftPos,
+            width: parseFloat($("#mines-grid").css("width")) - parseFloat($("#mines-grid").css("border-width"))*2,
             height: parseFloat($("#mines-grid").css("height"))
         });
+    }
+};
+
+function openScores(level) {
+    var i;
+    var x = document.getElementsByClassName("high-scores");
+    highScoreBeg = JSON.parse(localStorage.getItem("high-scores-beg"));
+    highScoreEasy = JSON.parse(localStorage.getItem("high-scores-easy"));
+    highScoreInter = JSON.parse(localStorage.getItem("high-scores-inter"));
+    highScoreExpert = JSON.parse(localStorage.getItem("high-scores-expert"));
+    $(`#${level} ul`).empty();
+    for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
+    }
+    document.getElementById(level).style.display = "block";
+    if (level == "Beginner") {
+        highScoreBeg["high-scores"].forEach((e) => {
+            if (e.name != "") {
+                $(`#${level} ul`).append(`<li>${e.name}: ${e.time} s</li>`)
+            }
+        })
+    } else if (level == "Easy") {
+        highScoreEasy["high-scores"].forEach((e) => {
+            if (e.name != "") {
+                $(`#${level} ul`).append(`<li>${e.name}: ${e.time} s</li>`)
+            }
+        })
+    } else if (level == "Intermediate") {
+        highScoreInter["high-scores"].forEach((e) => {
+            if (e.name != "") {
+                $(`#${level} ul`).append(`<li>${e.name}: ${e.time} s</li>`)
+            }
+        })
+    } else if (level == "Expert") {
+        highScoreExpert["high-scores"].forEach((e) => {
+            if (e.name != "") {
+                $(`#${level} ul`).append(`<li>${e.name}: ${e.time} s</li>`)
+            }
+        })
     }
 }
 
@@ -268,19 +348,141 @@ const deleteGame = () => {
 const startover = () => {
     deleteGame();
     newGame($("#difficulty").val());
+    clearInterval(timerOn);
+    $('#timer').find('.value').text(0);
     $(".ui-selectmenu-button-text").remove();
     $("#reset-icon img").attr("src", "../icons/smile-face.svg");
 }
 
+function updateDisplay() {
+    var value = parseFloat($('#timer').find('.value').text());
+    value = value + 0.01;
+    $('#timer').find('.value').text(value.toFixed(2));
+};
+
+const setHighScore = (time) => {
+    highScoreBeg = JSON.parse(localStorage.getItem("high-scores-beg"));
+    highScoreEasy = JSON.parse(localStorage.getItem("high-scores-easy"));
+    highScoreInter = JSON.parse(localStorage.getItem("high-scores-inter"));
+    highScoreExpert = JSON.parse(localStorage.getItem("high-scores-expert")); 
+    let newhighScore = {"high-scores": []};
+        if ($("#difficulty").val() == "beginner") {
+            highScoreBeg["high-scores"].some(element => {
+                if (element.time == "") {
+                    element.time = time;
+                    let newName = prompt("New Record!\n Insert your name: ");
+                    element.name = newName == "" ? " " : newName;
+                    localStorage.setItem("high-scores-beg", JSON.stringify(highScoreBeg));
+                    return true;
+                } 
+                if (parseFloat(element.time) > time) {
+                    let name = prompt("New Record!\n Insert your name: ");
+                    newhighScore["high-scores"].push({"name": name, "time": time});
+                    for (let i = newhighScore["high-scores"].length - 1; i < 5 - 1 ; i++) {
+                        newhighScore["high-scores"].push({"name": highScoreBeg["high-scores"][i]["name"], "time": highScoreBeg["high-scores"][i]["time"]});
+                    }
+                    localStorage.setItem("high-scores-beg", JSON.stringify(newhighScore));
+                    return true;
+                }
+                newhighScore["high-scores"].push({"name": element.name, "time": element.time});
+            });
+        } else if ($("#difficulty").val() == "easy") {
+            highScoreEasy["high-scores"].some(element => {
+                if (element.time == "") {
+                    element.time = time;
+                    element.name = prompt("New Record!\n Insert your name: ");
+                    localStorage.setItem("high-scores-easy", JSON.stringify(highScoreEasy));
+                    return true;
+                } 
+                if (parseFloat(element.time) > time) {
+                    let name = prompt("New Record!\n Insert your name: ");
+                    newhighScore["high-scores"].push({"name": name, "time": time});
+                    for (let i = newhighScore["high-scores"].length - 1; i < 5 - 1 ; i++) {
+                        newhighScore["high-scores"].push({"name": highScoreEasy["high-scores"][i]["name"], "time": highScoreEasy["high-scores"][i]["time"]});
+                    }
+                    localStorage.setItem("high-scores-easy", JSON.stringify(newhighScore));
+                    return true;
+                }
+                newhighScore["high-scores"].push({"name": element.name, "time": element.time});
+            });
+        } else if ($("#difficulty").val() == "inter") {
+            highScoreInter["high-scores"].some(element => {
+                if (element.time == "") {
+                    element.time = time;
+                    element.name = prompt("New Record!\n Insert your name: ");
+                    localStorage.setItem("high-scores-inter", JSON.stringify(highScoreInter));
+                    return true;
+                } 
+                if (parseFloat(element.time) > time) {
+                    let name = prompt("New Record!\n Insert your name: ");
+                    newhighScore["high-scores"].push({"name": name, "time": time});
+                    for (let i = newhighScore["high-scores"].length - 1; i < 5 - 1 ; i++) {
+                        newhighScore["high-scores"].push({"name": highScoreInter["high-scores"][i]["name"], "time": highScoreInter["high-scores"][i]["time"]});
+                    }
+                    localStorage.setItem("high-scores-inter", JSON.stringify(newhighScore));
+                    return true;
+                }
+                newhighScore["high-scores"].push({"name": element.name, "time": element.time});
+            });
+        } else if ($("#difficulty").val() == "expert") {
+            highScoreExpert["high-scores"].some(element => {
+                if (element.time == "") {
+                    element.time = time;
+                    element.name = prompt("New Record!\n Insert your name: ");
+                    localStorage.setItem("high-scores-expert", JSON.stringify(highScoreExpert));
+                    return true;
+                } 
+                if (parseFloat(element.time) > time) {
+                    let name = prompt("New Record!\n Insert your name: ");
+                    newhighScore["high-scores"].push({"name": name, "time": time});
+                    for (let i = newhighScore["high-scores"].length - 1; i < 5 - 1 ; i++) {
+                        newhighScore["high-scores"].push({"name": highScoreExpert["high-scores"][i]["name"], "time": highScoreExpert["high-scores"][i]["time"]});
+                    }
+                    localStorage.setItem("high-scores-expert", JSON.stringify(newhighScore));
+                    return true;
+                }
+                newhighScore["high-scores"].push({"name": element.name, "time": element.time});
+            });
+        }
+} 
+
+const showHighScores = () => {
+
+}
+
+
 $(document).ready(() => {
     window.addEventListener("contextmenu", e => e.preventDefault());
+
+    if (!!!localStorage.getItem("high-scores-beg") || !!!localStorage.getItem("high-scores-easy") || !!!localStorage.getItem("high-scores-inter") || !!!localStorage.getItem("high-scores-expert")) {
+        localStorage.setItem("high-scores-beg", JSON.stringify(highScoreBeg));
+        localStorage.setItem("high-scores-easy", JSON.stringify(highScoreEasy));
+        localStorage.setItem("high-scores-inter", JSON.stringify(highScoreInter));
+        localStorage.setItem("high-scores-expert", JSON.stringify(highScoreExpert));
+    } else {
+        highScoreBeg = JSON.parse(localStorage.getItem("high-scores-beg"));
+        highScoreEasy = JSON.parse(localStorage.getItem("high-scores-easy"));
+        highScoreInter = JSON.parse(localStorage.getItem("high-scores-inter"));
+        highScoreExpert = JSON.parse(localStorage.getItem("high-scores-expert")); 
+    }
+
     newGame("easy"); // Change to easy
     $("#difficulty").on("change", () => {
         startover();
     } );
     $(".ui-body-a").remove();
     $(".ui-selectmenu-button-text").remove();
+    $(".ui-page, .ui-page-theme-a, .ui-page-active").css("min-height", "auto");
+
     $(window).resize(() => {
-        console.log(window.innerWidth);
+        let leftPos = ($("#mines-grid").position().left);
+        
+        $("#game-over-div").css({
+            top: $("#mines-grid").position().top,
+            left: leftPos,
+            width: parseFloat($("#mines-grid").css("width")) - parseFloat($("#mines-grid").css("border-width"))*2,
+            height: parseFloat($("#mines-grid").css("height"))
+        });
     });
+
 })
